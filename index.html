@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>南国市保育所(園)保護者会連合会　担当役職検索システム</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;background:#f4f7fb;color:#243447}
+header{background:linear-gradient(135deg,#1976d2,#42a5f5);color:#fff;padding:28px 18px;text-align:center}
+header h1{margin:0 0 8px;font-size:26px}
+header p{margin:0;opacity:.92}
+.wrap{max-width:1050px;margin:24px auto;padding:0 14px}
+.panel{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.08);margin-bottom:18px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{flex:1;min-width:220px}
+label{display:block;font-weight:700;margin-bottom:7px}
+input,select{width:100%;padding:13px 14px;border:2px solid #d9e2ec;border-radius:10px;font-size:18px;background:#fff}
+button{border:0;border-radius:10px;padding:13px 18px;font-size:16px;font-weight:700;cursor:pointer;background:#1976d2;color:white}
+button.secondary{background:#607d8b}
+button.light{background:#e8f1fb;color:#1976d2}
+.result{display:none}
+.result h2{margin:0 0 14px}
+.badge{display:inline-block;background:#e3f2fd;color:#1565c0;padding:6px 10px;border-radius:999px;font-size:14px;margin-left:8px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 10px;border-bottom:1px solid #e6ebf0;text-align:left}
+th{background:#f0f5fa;position:sticky;top:0}
+.role{font-weight:800;color:#1565c0}
+.president{background:#fff8e1}
+.small{font-size:13px;color:#607d8b}
+.error{color:#c62828;font-weight:700;margin-top:10px}
+.footer{text-align:center;color:#78909c;font-size:12px;padding:10px}
+@media(max-width:600px){header h1{font-size:22px}.panel{padding:15px}th,td{padding:10px 7px;font-size:14px}}
+@media print{button,.footer{display:none!important}body{background:white}.panel{box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>南国市保育所(園)保護者会連合会<br>担当役職検索システム</h1>
+<p>年度を入力すると、全保育園の担当役職を一括表示します</p>
+</header>
+
+<div class="wrap">
+<div class="panel">
+  <div class="controls">
+    <div class="field">
+      <label for="year">年度を選択</label>
+      <select id="year" onchange="showYear()">
+        <option value="9">令和9年度</option>
+        <option value="10">令和10年度</option>
+        <option value="11">令和11年度</option>
+        <option value="12">令和12年度</option>
+        <option value="13">令和13年度</option>
+        <option value="14">令和14年度</option>
+        <option value="15">令和15年度</option>
+        <option value="16">令和16年度</option>
+        <option value="17">令和17年度</option>
+        <option value="18">令和18年度</option>
+        <option value="19">令和19年度</option>
+        <option value="20">令和20年度</option>
+        <option value="21">令和21年度</option>
+        <option value="22">令和22年度</option>
+        <option value="23">令和23年度</option>
+        <option value="24">令和24年度</option>
+        <option value="25">令和25年度</option>
+        <option value="26">令和26年度</option>
+        <option value="27">令和27年度</option>
+        <option value="28">令和28年度</option>
+        <option value="29">令和29年度</option>
+        <option value="30">令和30年度</option>
+        <option value="31">令和31年度</option>
+        <option value="32">令和32年度</option>
+        <option value="33">令和33年度</option>
+        <option value="34">令和34年度</option>
+        <option value="35">令和35年度</option>
+        <option value="36">令和36年度</option>
+        <option value="37">令和37年度</option>
+        <option value="38">令和38年度</option>
+        <option value="39">令和39年度</option>
+        <option value="40">令和40年度</option>
+      </select>
+    </div>
+    <button onclick="showYear()">検索</button>
+    <button class="light" onclick="changeYear(-1)">前年</button>
+    <button class="light" onclick="changeYear(1)">翌年</button>
+    <button class="secondary" onclick="window.print()">印刷</button>
+  </div>
+  <div id="error" class="error"></div>
+</div>
+
+<div id="result" class="panel result">
+  <h2 id="title"></h2>
+  <div style="overflow:auto">
+    <table>
+      <thead><tr><th>保育園名</th><th>担当役職</th><th>会長担当年度</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel">
+  <h3>登録されている会長担当年度</h3>
+  <div style="overflow:auto">
+  <table>
+    <thead><tr><th>年度</th><th>会長職者所属先</th></tr></thead>
+    <tbody id="baseTable"></tbody>
+  </table>
+  </div>
+  <p class="small">※役職の輪番は、資料の順番に基づき、会長担当年度を起点に算出します。令和9年度のみ、吾岡保育園と国府保育所の役職を交換しています。</p>
+</div>
+<div class="footer">輪番表をもとにした年度別担当役職検索</div>
+</div>
+
+<script>
+const bases = [
+  [9,"岡豊保育園"],[10,"長岡西部保育所"],[11,"後免野田保育園"],
+  [12,"久礼田保育所"],[13,"吾岡保育園"],[14,"十市･稲生保育園"],
+  [15,"大篠保育園"],[16,"明見保育所"],[17,"長岡東部保育園"],
+  [18,"里保育所"],[19,"国府保育所"],[20,"あけぼの保育所"],[21,"浜改田保育園"]
+];
+const roles = ["会長","副会長","会計","監査","スポーツ大会1","スポーツ大会2",
+               "ほいくまつり1","ほいくまつり2","巡回保育","ほいくまつり3",
+               "ほいくまつり4","前期書記","後期書記"];
+
+function roleFor(year, baseYear){
+  let n = ((year - baseYear) % roles.length + roles.length) % roles.length;
+  return roles[n];
+}
+function showYear(){
+  const y = parseInt(document.getElementById("year").value,10);
+  const err = document.getElementById("error");
+  if(!Number.isInteger(y) || y < 1){err.textContent="令和の年度を1以上の数字で入力してください。";return;}
+  err.textContent="";
+  document.getElementById("result").style.display="block";
+  document.getElementById("title").innerHTML=`令和${y}年度の担当役職 <span class="badge">${bases.length}園</span>`;
+  renderTable();
+}
+function renderTable(){
+  const y = parseInt(document.getElementById("year").value,10);
+
+  const rows = bases.map(([b,s])=>{
+    let r = roleFor(y,b);
+
+    // 特例：令和9年度のみ、吾岡保育園と国府保育所の役職を入れ換える
+    if(y === 9){
+      if(s === "吾岡保育園"){
+        r = roleFor(y,19); // 国府保育所の役職
+      }else if(s === "国府保育所"){
+        r = roleFor(y,13); // 吾岡保育園の役職
+      }
+    }
+
+    return `<tr class="${r==='会長'?'president':''}"><td>${s}</td><td class="role">${r}</td><td>令和${b}年度</td></tr>`;
+  });
+
+  document.getElementById("tbody").innerHTML=rows.join("");
+}
+function changeYear(d){
+  const select=document.getElementById("year");
+  const next=select.selectedIndex+d;
+  if(next>=0 && next<select.options.length){
+    select.selectedIndex=next;
+    showYear();
+  }
+}
+
+
+document.getElementById("baseTable").innerHTML=bases.map(([y,s])=>`<tr><td>令和${y}年度</td><td>${s}</td></tr>`).join("");
+showYear();
+</script>
+</body>
+</html>
